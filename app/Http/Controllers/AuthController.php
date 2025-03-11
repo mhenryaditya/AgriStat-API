@@ -21,7 +21,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Username atau Password salah! Silakan coba kembali.'], 400);
         }
 
-        $user = auth()->user();
+        $user = JWTAuth::user();
         $token = JWTAuth::fromUser($user, [
             'kode_pegawai' => $user->kode_pegawai,
             // 'category' => $user->category
@@ -97,7 +97,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'token' => $token,
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
             'refresh_token' => $refreshToken
         ]);
     }
