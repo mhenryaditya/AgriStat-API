@@ -92,7 +92,7 @@ class AuthController extends Controller
             'Content-Type' => $mimetype,
         ]);
     }
-
+    
     protected function respondWithToken($token, $refreshToken)
     {
         return response()->json([

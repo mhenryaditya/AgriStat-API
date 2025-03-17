@@ -18,12 +18,19 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware(['auth:api']);
 Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 Route::post('/user/register', [AuthController::class, 'register'])->middleware(['auth:api']);
-Route::get('/user/profile/{filename}', [AuthController::class, 'getProfileImage'])->middleware(['auth:api']); 
+Route::get('/user/profile/{filename}', [AuthController::class, 'getProfileImage'])->middleware(['auth:api']);
 
 // get user data
 Route::get('/users/list', [UserController::class, 'get'])->middleware(['auth:api'])->name('users');
-// update dan delete user
+// get user image name
+Route::get('/profile/image/{user}', [UserController::class, 'getImageName'])->middleware(['auth:api']); 
+// update user
 Route::put('/users/edit/{user}', [UserController::class, 'update'])->middleware(['auth:api']);
+// update users profile 
+Route::put('/profile/edit-profile/{user}', [UserController::class, 'updateProfile'])->middleware(['auth:api']);
+Route::put('/profile/edit-password/{user}', [UserController::class, 'updatePassword'])->middleware(['auth:api']);
+Route::post('/profile/edit-image/{user}', [UserController::class, 'updateImage'])->middleware(['auth:api']);
+// delete user
 Route::delete('/users/delete/{user}', [UserController::class, 'destroy'])->middleware(['auth:api']);
 // check if current user is valid from token
 Route::middleware('auth:api')->get('/user', function (Request $request) {
