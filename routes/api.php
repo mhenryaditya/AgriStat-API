@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CropsProductionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -13,6 +14,10 @@ Route::get('/', function () {
     ], 200);
 });
 
+// crops
+Route::post('/crops/import', [CropsProductionController::class, 'import'])->middleware(['auth:api']);
+Route::resource('/crops', CropsProductionController::class)->except(['create', 'edit'])->middleware(['auth:api']);
+
 // user
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware(['auth:api']);
@@ -23,7 +28,7 @@ Route::get('/user/profile/{filename}', [AuthController::class, 'getProfileImage'
 // get user data
 Route::get('/users/list', [UserController::class, 'get'])->middleware(['auth:api'])->name('users');
 // get user image name
-Route::get('/profile/image/{user}', [UserController::class, 'getImageName'])->middleware(['auth:api']); 
+Route::get('/profile/image/{user}', [UserController::class, 'getImageName'])->middleware(['auth:api']);
 // update user
 Route::put('/users/edit/{user}', [UserController::class, 'update'])->middleware(['auth:api']);
 // update users profile 
