@@ -13,13 +13,24 @@ class CropsProductionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
+    public function index(){
         $pageLength = request('pageLength', 10);
         $crops = CropsProduction::paginate($pageLength);
+        
+        return $this->formatResponse($crops);
+    }
 
+    public function getDataForStats(){
+        $pageLength = request('pageLength', 1000);
+        $crops = CropsProduction::paginate($pageLength);
+
+        return $this->formatResponse($crops);
+    }
+
+    private function formatResponse($crops){
         if ($crops->isEmpty()) {
             return response()->json([
+                'status' => 'failed',
                 'message' => 'No crops productions found',
                 'data' => [],
                 'pagination' => [

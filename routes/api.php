@@ -17,6 +17,7 @@ Route::get('/', function () {
 // crops
 Route::post('/crops/import', [CropsProductionController::class, 'import'])->middleware(['auth:api']);
 Route::resource('/crops', CropsProductionController::class)->except(['create', 'edit'])->middleware(['auth:api']);
+Route::get('/statistik/client', [CropsProductionController::class, 'getDataForStats']);
 
 // user
 Route::post('/auth/login', [AuthController::class, 'login']);
