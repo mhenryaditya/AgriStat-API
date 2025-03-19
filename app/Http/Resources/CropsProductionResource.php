@@ -15,10 +15,11 @@ class CropsProductionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'uuid' => $this->uuid,
+            'id' => $this->id,
             'year' => $this->year,
-            'province' => $this->vegetable,
+            'province' => $this->province,
             'production' => $this->production,
+            'vegetable' => $this->vegetable,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
