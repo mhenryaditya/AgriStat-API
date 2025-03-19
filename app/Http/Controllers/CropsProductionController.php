@@ -13,21 +13,105 @@ class CropsProductionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(){
-        $pageLength = request('pageLength', 10);
-        $crops = CropsProduction::paginate($pageLength);
-        
+    public function index(Request $request)
+    {
+        $query = CropsProduction::query();
+
+        // Filtering by crop name
+        if ($request->has('vegetable')) {
+            $query->where('vegetable', 'like', '%' . $request->input('vegetable') . '%');
+        }
+
+        // Filtering by year
+        if ($request->has('year')) {
+            $query->where('year', $request->input('year'));
+        }
+
+        // Filtering by province
+        if ($request->has('province')) {
+            $query->where('province', 'like', '%' . $request->input('province') . '%');
+        }
+
+        // Filtering by minimum production
+        if ($request->has('production_min')) {
+            $query->where('production', '>=', $request->input('production_min'));
+        }
+
+        // Filtering by maximum production
+        if ($request->has('production_max')) {
+            $query->where('production', '<=', $request->input('production_max'));
+        }
+
+        // Search across multiple fields
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%$search%")
+                    ->orWhere('year', 'like', "%$search%")
+                    ->orWhere('vegetable', 'like', "%$search%")
+                    ->orWhere('province', 'like', "%$search%")
+                    ->orWhere('production', 'like', "%$search%");
+            });
+        }
+
+        // Pagination
+        $pageLength = $request->input('pageLength', 10);
+        $crops = $query->paginate($pageLength);
+
         return $this->formatResponse($crops);
     }
 
-    public function getDataForStats(){
-        $pageLength = request('pageLength', 1000);
-        $crops = CropsProduction::paginate($pageLength);
+
+    public function getDataForStats(Request $request)
+    {
+        $query = CropsProduction::query();
+
+        // Filtering by crop name
+        if ($request->has('vegetable')) {
+            $query->where('vegetable', 'like', '%' . $request->input('vegetable') . '%');
+        }
+
+        // Filtering by year
+        if ($request->has('year')) {
+            $query->where('year', $request->input('year'));
+        }
+
+        // Filtering by province
+        if ($request->has('province')) {
+            $query->where('province', 'like', '%' . $request->input('province') . '%');
+        }
+
+        // Filtering by minimum production
+        if ($request->has('production_min')) {
+            $query->where('production', '>=', $request->input('production_min'));
+        }
+
+        // Filtering by maximum production
+        if ($request->has('production_max')) {
+            $query->where('production', '<=', $request->input('production_max'));
+        }
+
+        // Search across multiple fields
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%$search%")
+                    ->orWhere('year', 'like', "%$search%")
+                    ->orWhere('vegetable', 'like', "%$search%")
+                    ->orWhere('province', 'like', "%$search%")
+                    ->orWhere('production', 'like', "%$search%");
+            });
+        }
+
+        // Pagination
+        $pageLength = $request->input('pageLength', 10);
+        $crops = $query->paginate($pageLength);
 
         return $this->formatResponse($crops);
     }
 
-    private function formatResponse($crops){
+    private function formatResponse($crops)
+    {
         if ($crops->isEmpty()) {
             return response()->json([
                 'status' => 'failed',
