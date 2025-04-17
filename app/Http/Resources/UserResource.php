@@ -18,6 +18,7 @@ class UserResource extends JsonResource
             'kode_pegawai' => $this->kode_pegawai,
             'name' => $this->name,
             'email' => $this->email,
+            'img_profile' => $this->img_profile,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

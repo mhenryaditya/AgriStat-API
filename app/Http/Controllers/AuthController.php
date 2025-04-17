@@ -41,9 +41,20 @@ class AuthController extends Controller
         $refreshToken = $request->input('refresh_token');
         $user = User::where('refresh_token', $refreshToken)->first();
         if (!$user) {
-            return response()->json(['error' => 'Unauthorised'], 401);
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
-        $token = JWTAuth::fromUser($user, ['category' => $user->category]);
+
+        // Extend the expiration time for the token
+        $customClaims = [
+            'category' => $user->category ?? null,
+            'kode_pegawai' => $user->kode_pegawai,
+        ];
+
+        // Set a longer expiration time (e.g., 2 hours instead of the default)
+        JWTAuth::factory()->setTTL(120); // TTL in minutes
+        $token = JWTAuth::fromUser($user, $customClaims);
+
+        // Generate a new refresh token
         $newRefreshToken = $this->generateRefreshToken($user);
 
         return $this->respondWithToken($token, $newRefreshToken);
@@ -92,12 +103,12 @@ class AuthController extends Controller
             'Content-Type' => $mimetype,
         ]);
     }
-    
+
     protected function respondWithToken($token, $refreshToken)
     {
         return response()->json([
             'token' => $token,
-            'expires_in' => JWTAuth::factory()->getTTL() * 60,
+            'expires_in' => JWTAuth::factory()->getTTL(120) * 60, # valid for 2 hours
             'refresh_token' => $refreshToken
         ]);
     }

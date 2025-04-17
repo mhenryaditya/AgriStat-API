@@ -10,89 +10,121 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function get(){
-        $pageLength = request('pageLength', 10); 
-        $users = User::paginate($pageLength);
-
-        if ($users->isEmpty()) {
+    public function get(Request $request, string $id)
+    {
+        if ($id) {
+            $user = User::where('kode_pegawai', $id)->first();
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found',
+                    'data' => null,
+                ], 404);
+            }
             return response()->json([
-                'status' => 'empty',
-                'message' => 'No users found',
-                'data' => [],
-                'pagination' => [
-                    'current_page' => $users->currentPage(),
-                    'last_page' => $users->lastPage(),
-                    'per_page' => $users->perPage(),
-                    'total' => $users->total(),
-                ]
+                'status' => 'success',
+                'message' => 'User found',
+                'data' => new UserResource($user),
             ], 200);
+        } else {
+            $pageLength = request('pageLength', 10);
+            $data = User::paginate($pageLength);
+            $users = "";
+
+            if ($request->has('search')) {
+                $users = $data->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            }
+
+            if ($request->has('sortBy')) {
+                $users = $users->orderBy($request->sortBy, $request->sortDirection);
+            } else {
+                $users = $data->orderBy('created_at', 'desc');
+            }
+
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'status' => 'empty',
+                    'message' => 'No users found',
+                    'data' => [],
+                    'pagination' => [
+                        'current_page' => $users->currentPage(),
+                        'last_page' => $users->lastPage(),
+                        'per_page' => $users->perPage(),
+                        'total' => $users->total(),
+                    ]
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'User list retrieved successfully',
+                    'data' => UserResource::collection($users),
+                    'pagination' => [
+                        'current_page' => $users->currentPage(),
+                        'last_page' => $users->lastPage(),
+                        'per_page' => $users->perPage(),
+                        'total' => $users->total(),
+                    ]
+                ], 200);
+            }
         }
-        
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User list retrieved successfully',
-            'data' => UserResource::collection($users), 
-            'pagination' => [
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-                'per_page' => $users->perPage(),
-                'total' => $users->total(),
-            ]
-        ], 200);
     }
 
-    public function update(Request $request, User $user){
-        $validator = Validator::make($request->all(),[
-            'name'=> 'required|string|max:255',
-            'email'=> 'required|string|max:255|unique:users,email',
+    public function update(Request $request, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|max:255|unique:users,email',
             'password' => ['required', 'string', 'min:6', 'confirmed'],
-        ]); 
+        ]);
 
-        if($validator -> fails()){
-         return response()->json([
-            'messege' => "All fields are mandetoory",
-            'error' => $validator-> messages(),
-         ], 422);
+        if ($validator->fails()) {
+            return response()->json([
+                'messege' => "All fields are mandetoory",
+                'error' => $validator->messages(),
+            ], 422);
         }
 
         $validated = $validator->validated();
         $user->update([
             'name' => $request->name,
-            'email'=> $request->email,
+            'email' => $request->email,
             'password' => bcrypt($validated['password']),
         ]);
 
         return response()->json([
-            'messege'=> 'User Updated Succesfully',
+            'messege' => 'User Updated Succesfully',
             'data' => new UserResource($user)
         ], 200);
     }
 
-    public function updateProfile(Request $request, User $user){
-        $validator = Validator::make($request->all(),[
-            'name'=> 'required|string|max:255',
+    public function updateProfile(Request $request, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
             'email' => 'required|string|max:255|unique:users,email,' . $user->kode_pegawai . ',kode_pegawai',
-        ]); 
+        ]);
 
-        if($validator -> fails()){
-         return response()->json([
-            'messege' => "All fields are mandetoory",
-            'error' => $validator-> messages(),
-         ], 422);
+        if ($validator->fails()) {
+            return response()->json([
+                'messege' => "All fields are mandetoory",
+                'error' => $validator->messages(),
+            ], 422);
         }
 
         $user->update([
             'name' => $request->name,
-            'email'=> $request->email,
+            'email' => $request->email,
         ]);
 
         return response()->json([
-            'messege'=> 'User Updated Succesfully',
+            'messege' => 'User Updated Succesfully',
             'data' => new UserResource($user)
         ], 200);
     }
 
-    public function updatePassword(Request $request, User $user){
+    public function updatePassword(Request $request, User $user)
+    {
         $validator = Validator::make($request->all(), [
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
@@ -114,7 +146,8 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function getImageName($kodePegawai){
+    public function getImageName($kodePegawai)
+    {
         $user = User::where('kode_pegawai', $kodePegawai)->first();
         if (!$user) {
             return response()->json(['message' => 'User not found.'], 404);
@@ -129,9 +162,10 @@ class UserController extends Controller
             'image_name' => $imageName
         ], 200);
     }
-    
 
-    public function updateImage(Request $request, User $user){
+
+    public function updateImage(Request $request, User $user)
+    {
         $validator = Validator::make($request->all(), [
             'img_profile' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ]);
@@ -164,11 +198,12 @@ class UserController extends Controller
     }
 
 
-    public function destroy(User $user){
-        $user ->delete();
-        
+    public function destroy(User $user)
+    {
+        $user->delete();
+
         return response()->json([
-            'messege'=> 'User Deleted Succesfully',
+            'messege' => 'User Deleted Succesfully',
         ], 200);
     }
 }
