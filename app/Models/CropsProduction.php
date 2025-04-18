@@ -21,5 +21,9 @@ class CropsProduction extends Model
         'province',
         'vegetable',
         'production',
+        'planted_area',
+        'harvested_area',
+        'fertilizer_type',
+        'fertilizer_amount',
     ];
 }

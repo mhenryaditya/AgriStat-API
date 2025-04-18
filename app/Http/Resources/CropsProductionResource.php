@@ -20,6 +20,10 @@ class CropsProductionResource extends JsonResource
             'province' => $this->province,
             'production' => $this->production,
             'vegetable' => $this->vegetable,
+            'planted_area' => $this->planted_area,
+            'harvested_area' => $this->harvested_area,
+            'fertilizer_type' => $this->fertilizer_type,
+            'fertilizer_amount' => $this->fertilizer_amount,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

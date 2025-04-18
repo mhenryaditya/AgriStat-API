@@ -50,7 +50,11 @@ class CropsProductionController extends Controller
                     ->orWhere('year', 'like', "%$search%")
                     ->orWhere('vegetable', 'like', "%$search%")
                     ->orWhere('province', 'like', "%$search%")
-                    ->orWhere('production', 'like', "%$search%");
+                    ->orWhere('production', 'like', "%$search%")
+                    ->orWhere('planted_area', 'like', "%$search%")
+                    ->orWhere('harvested_area', 'like', "%$search%")
+                    ->orWhere('fertilizer_type', 'like', "%$search%")
+                    ->orWhere('fertilizer_amount', 'like', "%$search%");
             });
         }
 
@@ -99,7 +103,11 @@ class CropsProductionController extends Controller
                     ->orWhere('year', 'like', "%$search%")
                     ->orWhere('vegetable', 'like', "%$search%")
                     ->orWhere('province', 'like', "%$search%")
-                    ->orWhere('production', 'like', "%$search%");
+                    ->orWhere('production', 'like', "%$search%")
+                    ->orWhere('planted_area', 'like', "%$search%")
+                    ->orWhere('harvested_area', 'like', "%$search%")
+                    ->orWhere('fertilizer_type', 'like', "%$search%")
+                    ->orWhere('fertilizer_amount', 'like', "%$search%");
             });
         }
 
@@ -156,14 +164,22 @@ class CropsProductionController extends Controller
             'year' => ['required', 'integer', 'digits:4', 'min:2000', "max:" . (date('Y') + 1)],
             'province' => ['required', 'string'],
             'vegetable' => ['required', 'string'],
-            'production' => ['required', 'regex:/^\d+(\.\d{1,2})?$/']
+            'production' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'planted_area' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'harvested_area' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'fertilizer_type' => ['required', 'string'],
+            'fertilizer_amount' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
         ]);
 
         $crops = CropsProduction::create([
             'year' => $validated['year'],
             'province' => $validated['province'],
             'vegetable' => $validated['vegetable'],
-            'production' => $validated['production']
+            'production' => $validated['production'],
+            'planted_area' => $validated['planted_area'],
+            'harvested_area' => $validated['harvested_area'],
+            'fertilizer_type' => $validated['fertilizer_type'],
+            'fertilizer_amount' => $validated['fertilizer_amount'],
         ]);
 
         return response()->json([
@@ -183,8 +199,10 @@ class CropsProductionController extends Controller
         $reader = ReaderEntityFactory::createXLSXReader();
         $reader->open($file->getPathname());
 
-        $header = ['year', 'province', 'vegetable', 'production'];
+        $header = ['year', 'province', 'vegetable', 'production', 'planted_area', 'harvested_area', 'fertilizer_type', 'fertilizer_amount'];
         $isFirstRow = true;
+
+        set_time_limit(0);
 
         foreach ($reader->getSheetIterator() as $sheet) {
             foreach ($sheet->getRowIterator() as $row) {
@@ -202,7 +220,11 @@ class CropsProductionController extends Controller
                     'year' => $data['year'],
                     'province' => $data['province'],
                     'vegetable' => $data['vegetable'],
-                    'production' => $data['production']
+                    'production' => $data['production'],
+                    'planted_area' => $data['planted_area'],
+                    'harvested_area' => $data['harvested_area'],
+                    'fertilizer_type' => $data['fertilizer_type'],
+                    'fertilizer_amount' => $data['fertilizer_amount'],
                 ]);
             }
         }
@@ -260,14 +282,22 @@ class CropsProductionController extends Controller
             'year' => ['required', 'integer', 'digits:4', 'min:2000', "max:" . (date('Y') + 1)],
             'province' => ['required', 'string'],
             'vegetable' => ['required', 'string'],
-            'production' => ['required', 'regex:/^\d+(\.\d{1,2})?$/']
+            'production' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'planted_area' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'harvested_area' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'fertilizer_type' => ['required', 'string'],
+            'fertilizer_amount' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
         ]);
 
         $crops->update([
             'year' => $validated['year'],
             'province' => $validated['province'],
             'vegetable' => $validated['vegetable'],
-            'production' => $validated['production']
+            'production' => $validated['production'],
+            'planted_area' => $validated['planted_area'],
+            'harvested_area' => $validated['harvested_area'],
+            'fertilizer_type' => $validated['fertilizer_type'],
+            'fertilizer_amount' => $validated['fertilizer_amount'],
         ]);
 
         return response()->json([
