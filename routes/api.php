@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClassificationController;
+use App\Http\Controllers\ClusteringController;
 use App\Http\Controllers\CropsProductionController;
+use App\Http\Controllers\PredictionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -42,3 +45,6 @@ Route::delete('/users/delete/{user}', [UserController::class, 'destroy'])->middl
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return response()->json($request->user());
 });
+// Predict
+Route::post('/train-models', [PredictionController::class, 'trainModels'])->middleware(['auth:api']);
+Route::post('/predict', [PredictionController::class, 'predict'])->middleware(['auth:api']);
