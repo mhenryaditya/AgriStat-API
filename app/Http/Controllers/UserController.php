@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function get(Request $request, string $id)
-    {
-        if ($id) {
-            $user = User::where('kode_pegawai', $id)->first();
+    public function get(Request $request){
+        if ($request->has('id')) {
+            $user = User::where('kode_pegawai', $request->input('id'))->first();
             if (!$user) {
                 return response()->json([
                     'status' => 'error',
@@ -26,48 +25,48 @@ class UserController extends Controller
                 'message' => 'User found',
                 'data' => new UserResource($user),
             ], 200);
-        } else {
-            $pageLength = request('pageLength', 10);
-            $data = User::paginate($pageLength);
-            $users = "";
-
-            if ($request->has('search')) {
-                $users = $data->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('email', 'like', '%' . $request->search . '%');
-            }
-
-            if ($request->has('sortBy')) {
-                $users = $users->orderBy($request->sortBy, $request->sortDirection);
-            } else {
-                $users = $data->orderBy('created_at', 'desc');
-            }
-
-            if ($users->isEmpty()) {
-                return response()->json([
-                    'status' => 'empty',
-                    'message' => 'No users found',
-                    'data' => [],
-                    'pagination' => [
-                        'current_page' => $users->currentPage(),
-                        'last_page' => $users->lastPage(),
-                        'per_page' => $users->perPage(),
-                        'total' => $users->total(),
-                    ]
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'User list retrieved successfully',
-                    'data' => UserResource::collection($users),
-                    'pagination' => [
-                        'current_page' => $users->currentPage(),
-                        'last_page' => $users->lastPage(),
-                        'per_page' => $users->perPage(),
-                        'total' => $users->total(),
-                    ]
-                ], 200);
-            }
         }
+
+        $query = User::query();
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('kode_pegawai', 'like', "%$search%");
+            });
+        }
+        if ($request->has('sortBy') && $request->has('sortDirection')) {
+            $query->orderBy($request->input('sortBy'), $request->input('sortDirection'));
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+        $pageLength = $request->input('pageLength', 10);
+        $users = $query->paginate($pageLength);
+        if ($users->isEmpty()) {
+            return response()->json([
+                'status' => 'empty',
+                'message' => 'No users found',
+                'data' => [],
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'per_page' => $users->perPage(),
+                    'total' => $users->total(),
+                ]
+            ], 200);
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User list retrieved successfully',
+            'data' => UserResource::collection($users),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ]
+        ], 200);
     }
 
     public function update(Request $request, User $user)
