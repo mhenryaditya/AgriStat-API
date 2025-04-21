@@ -24,13 +24,13 @@ class ClusteringController extends Controller
 
         $samples = $data->map(function ($item) {
             return [
-                'year' => (int) $item->year,
-                'province' => (string) $item->province,
-                'vegetable' => (string) $item->vegetable,
+                // 'year' => (int) $item->year,
+                // 'province' => (string) $item->province,
+                // 'vegetable' => (string) $item->vegetable,
                 'production' => (float) $item->production,
-                'planted_area' => (float) $item->planted_area,
-                'harvested_area' => (float) $item->harvested_area,
-                'fertilizer_type' => (string) $item->fertilizer_type,
+                // 'planted_area' => (float) $item->planted_area,
+                // 'harvested_area' => (float) $item->harvested_area,
+                // 'fertilizer_type' => (string) $item->fertilizer_type,
                 'fertilizer_amount' => (float) $item->fertilizer_amount,
             ];
         })->toArray();

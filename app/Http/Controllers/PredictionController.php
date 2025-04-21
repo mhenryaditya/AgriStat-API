@@ -15,6 +15,7 @@ use Rubix\ML\Datasets\Unlabeled;
 use Rubix\ML\Pipeline;
 use Rubix\ML\Regressors\GradientBoost;
 use Rubix\ML\Regressors\RegressionTree;
+use Rubix\ML\Transformers\LambdaFunction;
 use Rubix\ML\Transformers\NumericStringConverter;
 use Rubix\ML\Transformers\OneHotEncoder;
 use Rubix\ML\Transformers\ZScaleStandardizer;
@@ -58,12 +59,33 @@ class PredictionController extends Controller
             (string) $fertilizerType[0],
             (float) $production[0],
         ]);
+        // Clustering karakteristik pertanian dan penggunaan pupuk
+        $clustering = $this->predictResult('clustering', [
+            // (int) $data['year'],
+            // (string) $data['province'],
+            // (string) $data['vegetable'],
+            (float) $production[0],
+            // (float) $data['planted_area'],
+            // (float) $data['harvested_area'],
+            // (string) $fertilizerType[0],
+            (float) $fertilizerAmount[0],
+        ]);
+        $clusterLabel = match ($clustering[0]) {
+            0 => 'Produktifitas rendah namun penggunaan pupuk tinggi',
+            1 => 'Produktifitas menengah hingga tinggi dengan penggunaan pupuk yang efisien',
+            2 => 'Produktifitas rendah dengan penggunaan pupuk moderate',
+            default => 'Unknown Cluster',
+        };
         return response()->json([
             'message' => 'Prediction successful',
             'data' => [
                 'production' => $production[0],
                 'fertilizer_type' => $fertilizerType[0],
                 'fertilizer_amount' => $fertilizerAmount[0],
+                'clustering' => [
+                    'cluster' => $clustering[0],
+                    'meaning' => $clusterLabel,
+                ],
             ],
         ]);
     }
@@ -165,7 +187,8 @@ class PredictionController extends Controller
         $pipeline = new Pipeline([
             new OneHotEncoder(),
             new ZScaleStandardizer(),
-        ], new ExtraTreeRegressor(210, 1));
+            new NumericStringConverter(),
+        ], new ExtraTreeRegressor(200, 1));
 
         // Train the model
         $pipeline->train($dataset);
@@ -187,9 +210,9 @@ class PredictionController extends Controller
         $r2score = $r2->score($predictions, $labels);
 
         // Save the model
-        $persistence = new Filesystem(storage_path('../app/Http/Services/fertilizer_model.rbx'));
-        $model = new PersistentModel($pipeline, $persistence);
-        $model->save();
+        // $persistence = new Filesystem(storage_path('../app/Http/Services/fertilizer_model.rbx'));
+        // $model = new PersistentModel($pipeline, $persistence);
+        // $model->save();
 
         return [
             'mae' => $maeScore,
