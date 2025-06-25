@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 
-Route::prefix('api/')->group(function () {
+Route::prefix('api')->group(function () {
     // Route::get('/', function () {
     //     return response()->json([
     //         'message' => 'Welcome to AgriStat API',
