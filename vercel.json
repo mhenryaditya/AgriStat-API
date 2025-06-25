@@ -1,6 +1,19 @@
 {
     "version": 2,
     "framework": null,
+    "builds": [
+        {
+            "src": "vercel-build.sh",
+            "use": "@vercel/static-build",
+            "config": {
+                "zeroConfig": true
+            }
+        },
+        {
+            "src": "api/index.php",
+            "use": "vercel-php@0.7.1"
+        }
+    ],
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.1"
