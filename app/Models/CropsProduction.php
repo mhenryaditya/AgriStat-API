@@ -26,4 +26,12 @@ class CropsProduction extends Model
         'fertilizer_type',
         'fertilizer_amount',
     ];
+
+    protected $casts = [
+        // 'year' => 'integer',
+        'production' => 'float',
+        'planted_area' => 'float',
+        'harvested_area' => 'float',
+        'fertilizer_amount' => 'float',
+    ];
 }
